@@ -1,0 +1,45 @@
+# ============================================================
+#   .gitignore for C++ Bank Management System
+# ============================================================
+
+# ---------------------------
+# Compiled Output Files
+# ---------------------------
+*.exe          # Windows executable (your compiled program)
+*.o            # Object files generated during compilation
+*.out          # Linux/macOS compiled output
+*.app          # macOS application bundle
+
+# ---------------------------
+# Binary Data Files
+# ---------------------------
+filename.bin   # Binary store of user account records (runtime data)
+
+# ---------------------------
+# IDE & Editor Clutter
+# ---------------------------
+.vscode/       # VS Code settings folder
+.idea/         # CLion / IntelliJ settings folder
+*.cbp          # Code::Blocks project file
+*.layout       # Code::Blocks layout file
+*.depend       # Code::Blocks dependency file
+*.DS_Store     # macOS finder metadata
+
+# ---------------------------
+# Build Directories
+# ---------------------------
+build/
+bin/
+Debug/
+Release/
+
+# ---------------------------
+# Temporary Files
+# ---------------------------
+temp.bin       # Temporary file used during save operations in the code
+*.tmp
+*.log
+
+usersdata.txt
+
+usersdata.txt
