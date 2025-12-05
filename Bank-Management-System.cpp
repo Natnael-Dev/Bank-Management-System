@@ -20,7 +20,7 @@ using namespace std;
 // ============================================================
 //   GLOBAL DATA
 // ============================================================
-
+const string VERSION = "1.0.0";  // current build version
 int userCount = 1; // starts at 1 because index 0 is unused (accounts start at index 1)
 
 struct Account {
