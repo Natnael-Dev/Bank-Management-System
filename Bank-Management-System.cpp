@@ -20,9 +20,11 @@ using namespace std;
 // ============================================================
 //   GLOBAL DATA
 // ============================================================
-const string VERSION = "1.0.0";  // current build version
-const int MAX_ACCOUNTS = 1000; // maximum number of accounts the system can hold
-int userCount = 1;              // starts at 1 because index 0 is unused (accounts start at index 1)
+const string VERSION = "1.0.0";    // current build version
+const int MAX_ACCOUNTS = 1000;     // maximum number of accounts the system can hold
+int userCount = 1;                 // starts at 1 because index 0 is unused (accounts start at index 1)
+
+// Represents a single bank account record stored in the system.
 struct Account {
     int    accNo;        // unique account number (auto-generated from base: 1000580)
     char   username[30]; // full name of the account holder (max 30 characters)
@@ -36,20 +38,24 @@ Account bankUsers[MAX_ACCOUNTS];
 //   UI HELPERS  -  decorative lines and section headers
 // ============================================================
 
+// Prints a single horizontal border line for UI boxes.
 void printLine() {
     cout << "  +----------------------------------------------------------+" << endl;
 }
 
+// Prints a double-line border for emphasis (used in banners).
 void printDoubleLine() {
     cout << "  +==========================================================" << endl;
 }
 
+// Prints a labeled section header box with a title inside.
 void printHeader(const string& title) {
     printLine();
     cout << "  |  " << left << setw(57) << title << "|" << endl;
     printLine();
 }
 
+// Displays the bank welcome banner at program startup.
 void printBanner() {
     cout << endl;
     cout << "  +=========================================================+" << endl;
@@ -86,7 +92,7 @@ void loadFromFile(Account arr[]) {
         // No file yet — first run, perfectly normal.
         return;
     }
-    inFile.read(reinterpret_cast<char*>(arr), sizeof(Account) * 500);
+    inFile.read(reinterpret_cast<char*>(arr), sizeof(Account) * MAX_ACCOUNTS);
     inFile.close();
 }
 
@@ -111,7 +117,7 @@ void writeLog() {
     logFile << "  ---------------------------------------------------------------" << endl;
     for (int k = 1; k < userCount; k++) {
         logFile << "  " << k << ".\t"
-                << bankUsers[k].accNo   << "\t\t"
+                << bankUsers[k].accNo    << "\t\t"
                 << bankUsers[k].username << "\t\t"
                 << bankUsers[k].balance  << " ETB\t\t"
                 << bankUsers[k].type     << endl;
@@ -121,9 +127,26 @@ void writeLog() {
 }
 
 // ============================================================
+//   INPUT HELPERS
+// ============================================================
+
+// Reads and validates an account number — rejects non-numeric and non-positive input.
+int readAccountNumber(const string& prompt) {
+    int accNo;
+    cout << prompt;
+    while (!(cin >> accNo) || accNo <= 0) {
+        cin.clear();
+        cin.ignore(1000, '\n');
+        cout << "  [!] Invalid account number. Please enter a valid number: ";
+    }
+    return accNo;
+}
+
+// ============================================================
 //   CORE FEATURES
 // ============================================================
 
+// Registers a new bank account and assigns an auto-generated account number.
 void createAccount(int k, Account users[]) {
     printHeader("  NEW ACCOUNT REGISTRATION");
     cout << endl;
@@ -174,12 +197,12 @@ void createAccount(int k, Account users[]) {
     cout << endl;
 }
 
+// Handles depositing funds into an existing account with input validation.
 void deposit() {
     printHeader("  DEPOSIT FUNDS");
     cout << endl;
-    cout << "  Enter your account number: ";
-    int accNo;
-    cin >> accNo;
+
+    int accNo = readAccountNumber("  Enter your account number: ");
 
     bool found = false;
     double amount = 0;
@@ -211,12 +234,12 @@ void deposit() {
     cout << endl;
 }
 
+// Handles withdrawing funds with overdraft protection.
 void withdraw() {
     printHeader("  WITHDRAW FUNDS");
     cout << endl;
-    cout << "  Enter your account number: ";
-    int accNo;
-    cin >> accNo;
+
+    int accNo = readAccountNumber("  Enter your account number: ");
 
     bool found = false;
     double amount = 0;
@@ -255,22 +278,20 @@ void withdraw() {
     cout << endl;
 }
 
+// Transfers funds between two accounts with full validation.
 void transfer() {
     printHeader("  TRANSFER FUNDS");
     cout << endl;
 
-    int senderAccNo, receiverAccNo;
     bool foundSender = false, foundReceiver = false;
 
-    cout << "  Enter your account number      : ";
-    cin >> senderAccNo;
+    int senderAccNo = readAccountNumber("  Enter your account number      : ");
 
     for (int i = 1; i < userCount; i++) {
         if (senderAccNo == bankUsers[i].accNo) {
             foundSender = true;
 
-            cout << "  Enter receiver's account number: ";
-            cin >> receiverAccNo;
+            int receiverAccNo = readAccountNumber("  Enter receiver's account number: ");
 
             if (receiverAccNo == senderAccNo) {
                 cout << "  [!] Cannot transfer to your own account." << endl;
@@ -322,12 +343,12 @@ void transfer() {
     cout << endl;
 }
 
+// Looks up and displays full details of a single account by account number.
 void retrieveAccount() {
     printHeader("  ACCOUNT DETAILS");
     cout << endl;
-    cout << "  Enter your account number: ";
-    int accNo;
-    cin >> accNo;
+
+    int accNo = readAccountNumber("  Enter your account number: ");
 
     bool found = false;
     for (int i = 1; i < userCount; i++) {
@@ -351,12 +372,12 @@ void retrieveAccount() {
     cout << endl;
 }
 
+// Allows updating the username or account type of an existing account.
 void modifyAccount() {
     printHeader("  MODIFY ACCOUNT");
     cout << endl;
-    cout << "  Enter your account number: ";
-    int accNo;
-    cin >> accNo;
+
+    int accNo = readAccountNumber("  Enter your account number: ");
 
     bool found = false;
     for (int i = 1; i < userCount; i++) {
@@ -412,13 +433,13 @@ void modifyAccount() {
     }
     cout << endl;
 }
+
 // Permanently removes an account from the system after user confirmation.
 void deleteAccount() {
     printHeader("  DELETE ACCOUNT");
     cout << endl;
-    cout << "  Enter account number to delete: ";
-    int accNo;
-    cin >> accNo;
+
+    int accNo = readAccountNumber("  Enter account number to delete: ");
 
     bool found = false;
     for (int i = 1; i < userCount; i++) {
@@ -432,6 +453,7 @@ void deleteAccount() {
             printLine();
             cout << endl;
             cout << "  [!] Are you sure you want to delete this account? (y/n): ";
+            cout << "  [!] This action is permanent and cannot be undone." << endl;
             char confirm;
             cin >> confirm;
             if (confirm == 'y' || confirm == 'Y') {
@@ -456,6 +478,8 @@ void deleteAccount() {
     }
     cout << endl;
 }
+
+// Displays a formatted table of all registered accounts in the system.
 void listAllAccounts() {
     printHeader("  ALL ACCOUNTS");
     cout << endl;
@@ -484,6 +508,7 @@ void listAllAccounts() {
     cout << endl;
 }
 
+// Renders the main navigation menu in the terminal.
 void showMenu() {
     cout << endl;
     printLine();
@@ -495,12 +520,12 @@ void showMenu() {
     cout << "  |  4.  Transfer Funds                                     |" << endl;
     cout << "  |  5.  View Account Details                               |" << endl;
     cout << "  |  6.  Modify Account                                     |" << endl;
-   cout << "   |  7.  List All Accounts                                  |" << endl;
+    cout << "  |  7.  List All Accounts                                  |" << endl;
     cout << "  |  8.  Delete Account                                     |" << endl;
     cout << "  |  9.  Exit                                               |" << endl;
     printLine();
     cout << "  Enter your choice (1-9): ";
-             }
+}
 
 // ============================================================
 //   MAIN
@@ -511,7 +536,7 @@ int main() {
     loadFromFile(bankUsers);
 
     // Count how many valid accounts are already stored
-   for (int i = 1; i < MAX_ACCOUNTS; i++) {
+    for (int i = 1; i < MAX_ACCOUNTS; i++) {
         if (!isEmpty(bankUsers, i)) {
             userCount++;
         }
@@ -526,7 +551,7 @@ int main() {
         while (!(cin >> option)) {
             cin.clear();
             cin.ignore(1000, '\n');
-            cout << "  [!] Please enter a valid number (1-8): ";
+            cout << "  [!] Please enter a valid number (1-9): ";
         }
 
         switch (option) {
@@ -558,7 +583,7 @@ int main() {
                 saveToFile(bankUsers);
                 writeLog();
                 break;
-           case 7:
+            case 7:
                 listAllAccounts();
                 break;
             case 8:
@@ -575,9 +600,9 @@ int main() {
                 cout << endl;
                 break;
             default:
-                cout << "  [!] Invalid choice. Please enter a number between 1 and 8." << endl;
+                cout << "  [!] Invalid choice. Please enter a number between 1 and 9." << endl;
         }
-    } while (option !=9 );
+    } while (option != 9);
 
     return 0;
 }
