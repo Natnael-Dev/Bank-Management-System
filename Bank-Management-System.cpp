@@ -21,16 +21,16 @@ using namespace std;
 //   GLOBAL DATA
 // ============================================================
 const string VERSION = "1.0.0";  // current build version
-int userCount = 1; // starts at 1 because index 0 is unused (accounts start at index 1)
-
+const int MAX_ACCOUNTS = 1000; // maximum number of accounts the system can hold
+int userCount = 1;              // starts at 1 because index 0 is unused (accounts start at index 1)
 struct Account {
-    int    accNo;
-    char   username[30];
-    double balance;
-    string type;
+    int    accNo;        // unique account number (auto-generated from base: 1000580)
+    char   username[30]; // full name of the account holder (max 30 characters)
+    double balance;      // current account balance in ETB (Ethiopian Birr)
+    string type;         // account type: Normal, Female's, Children's, or Sheria
 };
 
-Account bankUsers[500];
+Account bankUsers[MAX_ACCOUNTS];
 
 // ============================================================
 //   UI HELPERS  -  decorative lines and section headers
@@ -412,7 +412,50 @@ void modifyAccount() {
     }
     cout << endl;
 }
+// Permanently removes an account from the system after user confirmation.
+void deleteAccount() {
+    printHeader("  DELETE ACCOUNT");
+    cout << endl;
+    cout << "  Enter account number to delete: ";
+    int accNo;
+    cin >> accNo;
 
+    bool found = false;
+    for (int i = 1; i < userCount; i++) {
+        if (bankUsers[i].accNo == accNo) {
+            found = true;
+            cout << endl;
+            printLine();
+            cout << "  |  Account found:                                         |" << endl;
+            cout << "  |  Holder : " << left << setw(47) << bankUsers[i].username << "|" << endl;
+            cout << "  |  Balance: " << left << setw(43) << bankUsers[i].balance << "ETB |" << endl;
+            printLine();
+            cout << endl;
+            cout << "  [!] Are you sure you want to delete this account? (y/n): ";
+            char confirm;
+            cin >> confirm;
+            if (confirm == 'y' || confirm == 'Y') {
+                for (int j = i; j < userCount - 1; j++) {
+                    bankUsers[j] = bankUsers[j + 1];
+                }
+                bankUsers[userCount - 1] = Account();
+                userCount--;
+                cout << endl;
+                printLine();
+                cout << "  |  Account deleted successfully.                          |" << endl;
+                printLine();
+            } else {
+                cout << "  [!] Deletion cancelled." << endl;
+            }
+            break;
+        }
+    }
+
+    if (!found) {
+        cout << "  [!] Account not found. Please check the account number." << endl;
+    }
+    cout << endl;
+}
 void listAllAccounts() {
     printHeader("  ALL ACCOUNTS");
     cout << endl;
@@ -452,11 +495,12 @@ void showMenu() {
     cout << "  |  4.  Transfer Funds                                     |" << endl;
     cout << "  |  5.  View Account Details                               |" << endl;
     cout << "  |  6.  Modify Account                                     |" << endl;
-    cout << "  |  7.  List All Accounts                                  |" << endl;
-    cout << "  |  8.  Exit                                               |" << endl;
+   cout << "   |  7.  List All Accounts                                  |" << endl;
+    cout << "  |  8.  Delete Account                                     |" << endl;
+    cout << "  |  9.  Exit                                               |" << endl;
     printLine();
-    cout << "  Enter your choice (1-8): ";
-}
+    cout << "  Enter your choice (1-9): ";
+             }
 
 // ============================================================
 //   MAIN
@@ -467,7 +511,7 @@ int main() {
     loadFromFile(bankUsers);
 
     // Count how many valid accounts are already stored
-    for (int i = 1; i < 500; i++) {
+   for (int i = 1; i < MAX_ACCOUNTS; i++) {
         if (!isEmpty(bankUsers, i)) {
             userCount++;
         }
@@ -514,10 +558,15 @@ int main() {
                 saveToFile(bankUsers);
                 writeLog();
                 break;
-            case 7:
+           case 7:
                 listAllAccounts();
                 break;
             case 8:
+                deleteAccount();
+                saveToFile(bankUsers);
+                writeLog();
+                break;
+            case 9:
                 cout << endl;
                 printLine();
                 cout << "  |  Thank you for using Natnael International Bank!        |" << endl;
@@ -528,7 +577,7 @@ int main() {
             default:
                 cout << "  [!] Invalid choice. Please enter a number between 1 and 8." << endl;
         }
-    } while (option != 8);
+    } while (option !=9 );
 
     return 0;
 }
