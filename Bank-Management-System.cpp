@@ -591,14 +591,24 @@ int main() {
                 saveToFile(bankUsers);
                 writeLog();
                 break;
-            case 9:
+            case 9: {
                 cout << endl;
-                printLine();
-                cout << "  |  Thank you for using Natnael International Bank!        |" << endl;
-                cout << "  |  Goodbye.                                               |" << endl;
-                printLine();
-                cout << endl;
+                cout << "  [?] Are you sure you want to exit? (y/n): ";
+                char exitConfirm;
+                cin >> exitConfirm;
+                if (exitConfirm == 'y' || exitConfirm == 'Y') {
+                    cout << endl;
+                    printLine();
+                    cout << "  |  Thank you for using Natnael International Bank!        |" << endl;
+                    cout << "  |  Goodbye.                                               |" << endl;
+                    printLine();
+                    cout << endl;
+                } else {
+                    cout << "  [!] Exit cancelled. Returning to menu." << endl;
+                    option = 0; // reset so the loop continues
+                }
                 break;
+            }
             default:
                 cout << "  [!] Invalid choice. Please enter a number between 1 and 9." << endl;
         }
